@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: parking-lot-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=admin
+      - DB_PASSWORD=admin
+      - DB_NAME=parking_lot
+      - DB_SSLMODE=disable
+      - PARKING_FLOORS=4
+      - PARKING_ROWS=5
+      - PARKING_COLUMNS=5
+      - PARKING_FLOOR_1_VEHICLE_TYPE=bicycle
+      - PARKING_FLOOR_2_VEHICLE_TYPE=motorcycle
+      - PARKING_FLOOR_3_VEHICLE_TYPE=car
+      - PARKING_FLOOR_4_VEHICLE_TYPE=car
+      - PORT=8080
+    restart: unless-stopped
+    networks:
+      - parking-network
+
+  db:
+    image: postgres:14-alpine3.21
+    container_name: parking-lot-db
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=parking_lot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - parking-network
+
+networks:
+  parking-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
